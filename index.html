@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0e17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EduPlay">
+<link rel="manifest" href="manifest.json">
+<title>EduPlay v2 – Học Vui Mỗi Ngày</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0e17;--surface:#1a1830;--card:#211f35;--a1:#ff6b6b;--a2:#ffd93d;--a3:#6bcb77;--a4:#4d96ff;--a5:#c77dff;--a6:#ff9f43;--text:#fffffe;--muted:#a7a9be;--r:16px;--rl:24px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse at 20% 50%,#1a103a 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,#0d1f3c 0%,transparent 50%),var(--bg)}
+.stars::before{content:'';position:absolute;inset:0;background-image:radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,.6) 0%,transparent 100%),radial-gradient(1px 1px at 30% 40%,rgba(255,255,255,.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 55% 10%,rgba(255,255,255,.5) 0%,transparent 100%),radial-gradient(1px 1px at 75% 60%,rgba(255,255,255,.3) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 90% 25%,rgba(255,255,255,.6) 0%,transparent 100%);animation:twinkle 4s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.7}to{opacity:1}}
+#app{position:relative;z-index:1}
+nav{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(26,24,48,.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;z-index:100}
+.logo{font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--a2),var(--a1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
+.logo span{-webkit-text-fill-color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.badge{display:flex;align-items:center;gap:5px;border-radius:99px;padding:5px 12px;font-weight:800;font-size:.82rem}
+.badge-xp{background:rgba(255,217,61,.13);border:1px solid rgba(255,217,61,.28);color:var(--a2)}
+.badge-streak{background:rgba(255,107,107,.13);border:1px solid rgba(255,107,107,.28);color:var(--a1)}
+#installBanner{display:none;align-items:center;justify-content:space-between;padding:10px 20px;background:linear-gradient(90deg,rgba(77,150,255,.15),rgba(199,125,255,.15));border-bottom:1px solid rgba(77,150,255,.2);font-size:.85rem;gap:10px}
+#installBanner.show{display:flex}
+.install-btn{background:linear-gradient(135deg,var(--a4),var(--a5));border:none;border-radius:10px;padding:7px 16px;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:.82rem;cursor:pointer;white-space:nowrap}
+.dismiss-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px}
+.page{display:none;padding:24px 18px;max-width:1000px;margin:0 auto}
+.page.active{display:block}
+.hero{text-align:center;padding:36px 16px 24px;animation:fadeUp .6s ease both}
+.hero-emoji{font-size:3.5rem;display:block;margin-bottom:10px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero h1{font-family:'Baloo 2',cursive;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;background:linear-gradient(135deg,var(--a2) 0%,var(--a1) 50%,var(--a5) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.hero p{color:var(--muted);font-size:1rem;max-width:460px;margin:0 auto 28px}
+.subject-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.subject-card{background:var(--card);border-radius:var(--rl);padding:22px 20px;border:2px solid transparent;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden;animation:fadeUp .5s ease both}
+.subject-card:hover{transform:translateY(-5px);box-shadow:0 16px 36px rgba(0,0,0,.4)}
+.subject-card::before{content:'';position:absolute;inset:0;background:var(--grad);opacity:.08;transition:opacity .2s}
+.subject-card:hover::before{opacity:.18}
+.subject-card[data-s="math"]{--grad:linear-gradient(135deg,#4d96ff,#c77dff);border-color:rgba(77,150,255,.2)}
+.subject-card[data-s="english"]{--grad:linear-gradient(135deg,#6bcb77,#ffd93d);border-color:rgba(107,203,119,.2)}
+.subject-card[data-s="literature"]{--grad:linear-gradient(135deg,#ff6b6b,#ffd93d);border-color:rgba(255,107,107,.2)}
+.subject-card[data-s="chinese"]{--grad:linear-gradient(135deg,#ff9f43,#ff6b6b);border-color:rgba(255,159,67,.2)}
+.card-icon{font-size:2.5rem;margin-bottom:10px;display:block}
+.card-title{font-family:'Baloo 2',cursive;font-size:1.25rem;font-weight:700;margin-bottom:4px}
+.card-desc{color:var(--muted);font-size:.85rem;line-height:1.5}
+.card-meta{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.07);border-radius:99px;padding:3px 10px;font-size:.75rem;font-weight:700;color:var(--muted)}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.section-header h2{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800}
+.back-btn{background:rgba(255,255,255,.07);border:none;border-radius:10px;padding:7px 12px;color:var(--text);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:5px;transition:background .2s}
+.back-btn:hover{background:rgba(255,255,255,.14)}
+.class-tag{background:rgba(255,255,255,.08);border-radius:99px;padding:4px 12px;font-size:.8rem;font-weight:700;color:var(--muted)}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:12px;margin-top:8px}
+.class-btn{background:var(--card);border:2px solid rgba(255,255,255,.08);border-radius:var(--r);padding:14px 8px;cursor:pointer;transition:all .2s;text-align:center}
+.class-btn:hover{transform:scale(1.05);border-color:rgba(255,255,255,.25)}
+.class-btn.selected{border-color:var(--sel-color,var(--a4));background:rgba(77,150,255,.1)}
+.class-num{font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800}
+.class-label{font-size:.65rem;color:var(--muted);margin-top:2px}
+.grade-group{margin-bottom:24px}
+.grade-group h3{font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;margin-bottom:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.grade-divider{flex:1;height:1px;background:rgba(255,255,255,.07)}
+.continue-btn{width:100%;padding:14px;border-radius:var(--r);margin-top:20px;background:linear-gradient(135deg,var(--a4),var(--a5));border:none;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;transition:transform .15s,box-shadow .15s;opacity:.4;pointer-events:none}
+.continue-btn.ready{opacity:1;pointer-events:all}
+.continue-btn.ready:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(77,150,255,.4)}
+.tabs{display:flex;gap:8px;margin-bottom:24px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{background:var(--card);border:2px solid rgba(255,255,255,.07);border-radius:10px;padding:9px 16px;color:var(--muted);font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.tab-btn.active{background:var(--tc,var(--a4));border-color:transparent;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.tab-btn:hover:not(.active){border-color:rgba(255,255,255,.18);color:var(--text)}
+.theory-list{display:grid;gap:12px}
+.theory-item{background:var(--card);border-radius:var(--r);padding:16px 18px;cursor:pointer;border:2px solid rgba(255,255,255,.05);transition:all .2s;display:flex;align-items:center;gap:14px}
+.theory-item:hover{border-color:rgba(255,255,255,.18);transform:translateX(4px)}
+.theory-num{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;flex-shrink:0}
+.theory-info h4{font-weight:700;margin-bottom:3px;font-size:.95rem}
+.theory-info p{color:var(--muted);font-size:.8rem}
+.theory-arrow{margin-left:auto;color:var(--muted);font-size:1.1rem}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--rl);padding:24px;max-width:680px;width:100%;max-height:88vh;overflow-y:auto;border:1px solid rgba(255,255,255,.09);animation:popIn .3s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.modal-title{font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800}
+.close-btn{background:rgba(255,255,255,.07);border:none;border-radius:8px;width:32px;height:32px;color:var(--text);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lc{line-height:1.8;color:var(--muted)}
+.lc h3{color:var(--text);margin:18px 0 7px;font-size:1rem}
+.lc .hl{background:rgba(77,150,255,.1);border-left:3px solid var(--a4);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;color:var(--text)}
+.lc .ex{background:rgba(107,203,119,.08);border-radius:8px;padding:12px 14px;margin:8px 0;font-family:monospace;font-size:.88rem;color:var(--a3);white-space:pre-wrap}
+.formula{background:rgba(199,125,255,.1);border-radius:8px;padding:12px 18px;text-align:center;font-size:1.05rem;font-weight:700;color:var(--a5);margin:12px 0}
+.hanzi-big{font-size:2.5rem;text-align:center;padding:14px;letter-spacing:6px;color:var(--a6)}
+.tone-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.82rem}
+.tone-table td,.tone-table th{padding:7px 10px;border:1px solid rgba(255,255,255,.08)}
+.tone-table th{background:rgba(255,255,255,.05);font-weight:700;color:var(--text)}
+.quiz-wrapper{max-width:620px}
+.quiz-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.quiz-pb{flex:1;background:rgba(255,255,255,.09);border-radius:99px;height:7px;margin:0 12px}
+.quiz-pb-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--a4),var(--a5));transition:width .4s}
+.quiz-q-num{color:var(--muted);font-size:.8rem;font-weight:700;white-space:nowrap}
+.shuffle-badge{font-size:.72rem;background:rgba(107,203,119,.12);color:var(--a3);border-radius:99px;padding:2px 8px;font-weight:700;border:1px solid rgba(107,203,119,.2)}
+.quiz-question{font-family:'Baloo 2',cursive;font-size:1.15rem;font-weight:700;margin-bottom:20px;line-height:1.5}
+.quiz-options{display:grid;gap:10px}
+.quiz-option{background:var(--card);border:2px solid rgba(255,255,255,.07);border-radius:var(--r);padding:12px 16px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:600;font-size:.95rem;color:var(--text);transition:all .2s;text-align:left;display:flex;align-items:center;gap:10px}
+.quiz-option:hover:not(:disabled){border-color:var(--a4);background:rgba(77,150,255,.08)}
+.quiz-option.correct{border-color:var(--a3);background:rgba(107,203,119,.12);color:var(--a3)}
+.quiz-option.wrong{border-color:var(--a1);background:rgba(255,107,107,.1);color:var(--a1)}
+.opt-letter{width:30px;height:30px;border-radius:7px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0}
+.quiz-fb{margin-top:16px;padding:12px 16px;border-radius:var(--r);font-weight:700;font-size:.9rem}
+.quiz-fb.correct{background:rgba(107,203,119,.12);color:var(--a3);border:1px solid rgba(107,203,119,.25)}
+.quiz-fb.wrong{background:rgba(255,107,107,.1);color:var(--a1);border:1px solid rgba(255,107,107,.2)}
+.next-btn{margin-top:16px;padding:12px 28px;border-radius:var(--r);background:linear-gradient(135deg,var(--a4),var(--a5));border:none;color:#fff;font-family:'Nunito',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;transition:transform .15s;display:none}
+.next-btn:hover{transform:translateY(-2px)}
+.quiz-result{text-align:center;padding:32px 16px;animation:fadeUp .5s ease both}
+.result-emoji{font-size:3.5rem;margin-bottom:14px;display:block}
+.result-score{font-family:'Baloo 2',cursive;font-size:2.8rem;font-weight:900;margin-bottom:6px}
+.result-msg{color:var(--muted);margin-bottom:20px;font-size:1rem}
+.result-xp{display:inline-flex;align-items:center;gap:7px;background:rgba(255,217,61,.13);border:1px solid rgba(255,217,61,.28);border-radius:99px;padding:8px 20px;font-weight:800;color:var(--a2);font-size:1rem;margin-bottom:22px}
+.retry-btn{padding:10px 24px;border-radius:var(--r);background:var(--card);border:2px solid rgba(255,255,255,.1);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;font-size:.9rem;margin-right:10px;transition:all .2s}
+.fc-area{perspective:1000px;max-width:480px;margin:0 auto}
+.fc-scene{width:100%;height:230px;position:relative;cursor:pointer;margin-bottom:16px}
+.fc-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .45s}
+.fc-scene.flipped .fc-inner{transform:rotateY(180deg)}
+.fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--rl);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;border:2px solid}
+.fc-front{background:linear-gradient(135deg,rgba(77,150,255,.15),rgba(199,125,255,.15));border-color:rgba(77,150,255,.25)}
+.fc-back{background:linear-gradient(135deg,rgba(107,203,119,.12),rgba(255,217,61,.08));border-color:rgba(107,203,119,.25);transform:rotateY(180deg)}
+.fc-label{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.fc-word{font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;text-align:center;line-height:1.2}
+.fc-phonetic{color:var(--muted);font-size:.88rem;margin-top:6px}
+.fc-meaning{text-align:center;font-size:.95rem;font-weight:600;margin-top:6px;line-height:1.5}
+.fc-hint{font-size:.76rem;color:var(--muted);margin-top:6px;text-align:center}
+.fc-controls{display:flex;justify-content:center;gap:10px;margin-top:8px}
+.fc-btn{padding:9px 20px;border-radius:10px;border:2px solid rgba(255,255,255,.09);background:var(--card);color:var(--text);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;transition:all .2s;display:flex;align-items:center;gap:5px}
+.fc-btn.know{border-color:rgba(107,203,119,.35);color:var(--a3)}
+.fc-btn.know:hover{background:rgba(107,203,119,.12)}
+.fc-btn.dontknow{border-color:rgba(255,107,107,.35);color:var(--a1)}
+.fc-btn.dontknow:hover{background:rgba(255,107,107,.1)}
+.fc-prog{text-align:center;color:var(--muted);font-size:.8rem;margin-top:12px}
+.fc-tap{text-align:center;color:var(--muted);font-size:.78rem;margin-bottom:6px}
+.lb-wrap{max-width:560px}
+.lb-item{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--r);padding:12px 16px;margin-bottom:9px;border:2px solid rgba(255,255,255,.05);transition:transform .15s}
+.lb-item:hover{transform:scale(1.01)}
+.lb-item.me{border-color:rgba(255,217,61,.3);background:rgba(255,217,61,.05)}
+.lb-rank{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;flex-shrink:0}
+.lb-rank.g{background:rgba(255,215,0,.18);color:#ffd700}
+.lb-rank.s{background:rgba(192,192,192,.18);color:#c0c0c0}
+.lb-rank.b{background:rgba(205,127,50,.18);color:#cd7f32}
+.lb-avatar{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:rgba(255,255,255,.07)}
+.lb-name{font-weight:700;flex:1;font-size:.9rem}
+.lb-bar-w{flex:1;height:5px;background:rgba(255,255,255,.07);border-radius:99px;margin:0 6px}
+.lb-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--a2),var(--a1))}
+.lb-score{font-weight:800;color:var(--a2);font-size:.88rem}
+@keyframes fadeUp{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.stagger>*{animation:fadeUp .4s ease both}
+.stagger>*:nth-child(1){animation-delay:.04s}.stagger>*:nth-child(2){animation-delay:.08s}
+.stagger>*:nth-child(3){animation-delay:.12s}.stagger>*:nth-child(4){animation-delay:.16s}
+.stagger>*:nth-child(5){animation-delay:.20s}.stagger>*:nth-child(6){animation-delay:.24s}
+.stagger>*:nth-child(7){animation-delay:.28s}.stagger>*:nth-child(8){animation-delay:.32s}
+.cp{position:fixed;width:9px;height:9px;top:-9px;pointer-events:none;z-index:999;border-radius:2px;animation:cf 1s ease-in forwards}
+@keyframes cf{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(26,24,48,.95);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 20px;font-size:.85rem;font-weight:700;z-index:500;transition:all .3s;opacity:0;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .em{font-size:2.5rem;margin-bottom:12px;display:block}
+@media(max-width:480px){nav{padding:10px 14px}.page{padding:16px 14px}.hero{padding:24px 12px 16px}.fc-scene{height:200px}.fc-word{font-size:1.5rem}}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div id="app">
+
+<nav>
+  <div class="logo" onclick="goHome()">Edu<span>Play</span> 🎮</div>
+  <div class="nav-right">
+    <div class="badge badge-streak">🔥 <span id="streakCount">3</span></div>
+    <div class="badge badge-xp">⭐ <span id="xpCount">240</span></div>
+  </div>
+</nav>
+
+<div id="installBanner">
+  <span>📲 Cài EduPlay lên điện thoại để học offline!</span>
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button class="install-btn" id="installBtn">Cài ngay</button>
+    <button class="dismiss-btn" onclick="document.getElementById('installBanner').classList.remove('show')">✕</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <span class="hero-emoji">🚀</span>
+    <h1>Học Vui Mỗi Ngày!</h1>
+    <p>Chọn môn học và bắt đầu chinh phục kiến thức 🌟</p>
+  </div>
+  <div class="subject-grid stagger">
+    <div class="subject-card" data-s="math" onclick="goClassSelect('math')">
+      <span class="card-icon">📐</span>
+      <div class="card-title" style="color:#4d96ff">Toán Học</div>
+      <div class="card-desc">Số học, đại số, hình học — từ cơ bản đến nâng cao</div>
+      <div class="card-meta"><span class="pill">Lớp 1–12</span><span class="pill">Quiz ngẫu nhiên</span></div>
+    </div>
+    <div class="subject-card" data-s="english" onclick="goClassSelect('english')">
+      <span class="card-icon">🌍</span>
+      <div class="card-title" style="color:#6bcb77">Tiếng Anh</div>
+      <div class="card-desc">Ngữ pháp, từ vựng, flashcard — giao tiếp tự tin</div>
+      <div class="card-meta"><span class="pill">Lớp 1–12</span><span class="pill">Flashcard</span></div>
+    </div>
+    <div class="subject-card" data-s="literature" onclick="goClassSelect('literature')">
+      <span class="card-icon">📖</span>
+      <div class="card-title" style="color:#ff6b6b">Ngữ Văn</div>
+      <div class="card-desc">Văn học, phân tích tác phẩm, luyện viết</div>
+      <div class="card-meta"><span class="pill">Lớp 3–12</span><span class="pill">Bài học hay</span></div>
+    </div>
+    <div class="subject-card" data-s="chinese" onclick="goClassSelect('chinese')">
+      <span class="card-icon">🈶</span>
+      <div class="card-title" style="color:#ff9f43">Tiếng Trung</div>
+      <div class="card-desc">Hán tự, Pinyin, ngữ pháp HSK — sơ cấp đến trung cấp</div>
+      <div class="card-meta"><span class="pill">HSK 1–4</span><span class="pill">Mới ✨</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLASS SELECT -->
+<div class="page" id="page-class">
+  <div class="section-header">
+    <button class="back-btn" onclick="goHome()">← Trang chủ</button>
+    <h2 id="classSubjectTitle"></h2>
+  </div>
+  <p style="color:var(--muted);margin-bottom:20px;font-size:.9rem">Chọn lớp học để xem bài học phù hợp với chương trình của bạn:</p>
+  <div id="classGrid"></div>
+  <button class="continue-btn" id="continueBtn" onclick="goSubject()">Tiếp tục →</button>
+</div>
+
+<!-- SUBJECT -->
+<div class="page" id="page-subject">
+  <div class="section-header">
+    <button class="back-btn" onclick="goClassSelect(currentSubject)">← Đổi lớp</button>
+    <h2 id="subjectTitle"></h2>
+    <span class="class-tag" id="classTag"></span>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" style="--tc:#4d96ff" onclick="switchTab('theory',this)">📚 Lý Thuyết</button>
+    <button class="tab-btn" style="--tc:#ff6b6b" onclick="switchTab('quiz',this)">🧩 Quiz</button>
+    <button class="tab-btn" style="--tc:#6bcb77" onclick="switchTab('flashcard',this)">🃏 Flashcard</button>
+    <button class="tab-btn" style="--tc:#ffd93d" onclick="switchTab('leaderboard',this)">🏆 BXH</button>
+  </div>
+  <div id="tab-theory"></div>
+  <div id="tab-quiz" style="display:none"></div>
+  <div id="tab-flashcard" style="display:none"></div>
+  <div id="tab-leaderboard" style="display:none"></div>
+</div>
+
+<!-- LESSON MODAL -->
+<div class="overlay" id="lessonOverlay" onclick="closeLessonBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="lessonTitle"></div>
+      <button class="close-btn" onclick="closeLesson()">✕</button>
+    </div>
+    <div class="lc" id="lessonContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+const D={
+  math:{name:'📐 Toán Học',color:'#4d96ff',classes:{
+    '1':{
+      lessons:[
+        {t:'Các số từ 1 đến 10',d:'Đếm và nhận biết số cơ bản',c:`<h3>📌 Chữ số 1–10</h3><div class="hanzi-big" style="font-size:2rem;letter-spacing:4px;color:var(--a4)">1 2 3 4 5 6 7 8 9 10</div><h3>➕ Phép cộng đơn giản</h3><div class="formula">2 + 3 = 5 &nbsp;|&nbsp; 4 + 4 = 8</div><div class="hl">💡 Dùng ngón tay để đếm khi mới học!</div>`},
+        {t:'Hình dạng cơ bản',d:'Tròn, vuông, tam giác',c:`<h3>📌 Các hình</h3><div class="ex">⭕ Hình tròn — đồng xu, bánh xe\n⬛ Hình vuông — viên gạch, khung ảnh\n🔺 Tam giác — mái nhà, lát pizza</div><div class="hl">💡 Tìm hình này xung quanh nhà em nhé!</div>`}
+      ],
+      quiz:[
+        {q:'2 + 3 = ?',o:['4','5','6','7'],a:1},
+        {q:'Hình nào có 3 góc?',o:['Hình tròn','Hình vuông','Tam giác','Hình chữ nhật'],a:2},
+        {q:'1 + 1 = ?',o:['1','2','3','4'],a:1},
+        {q:'5 – 2 = ?',o:['2','3','4','5'],a:1},
+        {q:'Số nào lớn hơn: 7 hay 4?',o:['4','7','Bằng nhau','Không biết'],a:1}
+      ],
+      fc:[
+        {f:'Số 1',p:'One',b:'Một đơn vị — số nhỏ nhất trong tự nhiên dương',h:'1 quả táo'},
+        {f:'Cộng (+)',p:'Addition',b:'Gộp hai nhóm lại để có tổng',h:'2 + 3 = 5'},
+        {f:'Trừ (−)',p:'Subtraction',b:'Bớt một phần từ một số để có hiệu',h:'5 − 2 = 3'}
+      ]
+    },
+    '3':{
+      lessons:[
+        {t:'Phân số đơn giản',d:'1/2, 1/3, 1/4 — ý nghĩa và cách đọc',c:`<h3>📌 Phân số</h3><p>Phân số <b>a/b</b>: chia đều một vật thành <b>b</b> phần, lấy <b>a</b> phần.</p><div class="formula">1/2 = một nửa &nbsp;|&nbsp; 1/4 = một phần tư</div><div class="ex">Cắt bánh thành 4 phần bằng nhau, lấy 1 phần = 1/4 cái bánh</div><div class="hl">💡 Tử số (trên) &lt; Mẫu số (dưới) → phân số bé hơn 1</div>`},
+        {t:'Bảng nhân 2–5',d:'Học thuộc bảng nhân cơ bản',c:`<h3>📌 Bảng nhân 3</h3><div class="ex">3×1=3 | 3×2=6 | 3×3=9 | 3×4=12\n3×5=15 | 3×6=18 | 3×7=21 | 3×8=24 | 3×9=27 | 3×10=30</div><div class="formula">a × b = b × a (Tính chất giao hoán)</div><div class="hl">💡 Mẹo: các số trong bảng nhân 3 cách nhau 3 đơn vị</div>`},
+        {t:'Chu vi & Diện tích hình chữ nhật',d:'Công thức và ví dụ thực tế',c:`<h3>📌 Chu vi</h3><div class="formula">C = (dài + rộng) × 2</div><div class="ex">Dài=8cm, rộng=5cm → C=(8+5)×2=26 cm</div><h3>📌 Diện tích</h3><div class="formula">S = dài × rộng</div><div class="ex">S = 8 × 5 = 40 cm²</div>`}
+      ],
+      quiz:[
+        {q:'3 × 4 = ?',o:['10','11','12','13'],a:2},
+        {q:'Chu vi hình chữ nhật dài 6cm, rộng 4cm là?',o:['10cm','20cm','24cm','12cm'],a:1},
+        {q:'Phân số 1/2 có nghĩa là?',o:['Một phần ba','Một nửa','Hai phần ba','Một phần tư'],a:1},
+        {q:'5 × 7 = ?',o:['30','35','40','25'],a:1},
+        {q:'Diện tích hình vuông cạnh 4cm là?',o:['8cm²','12cm²','16cm²','20cm²'],a:2}
+      ],
+      fc:[
+        {f:'Phân số',p:'Fraction',b:'Biểu diễn 1 phần của tổng thể, dạng a/b (b≠0)',h:'1/4 cái bánh'},
+        {f:'Chu vi',p:'Perimeter',b:'Tổng độ dài tất cả các cạnh của hình',h:'Hình vuông: C = 4 × cạnh'},
+        {f:'Diện tích',p:'Area',b:'Số đo phần mặt phẳng bên trong hình',h:'S = dài × rộng'}
+      ]
+    },
+    '6':{
+      lessons:[
+        {t:'Số nguyên âm',d:'Khái niệm và trục số',c:`<h3>📌 Số nguyên âm</h3><p>Là các số nhỏ hơn 0: <b>−1, −2, −3, ...</b></p><div class="ex">Nhiệt độ −5°C = lạnh hơn 0°C 5 độ\nTầng hầm −1 = một tầng dưới mặt đất</div><div class="formula">... −3 &lt; −2 &lt; −1 &lt; 0 &lt; 1 &lt; 2 &lt; 3 ...</div><div class="hl">💡 Số âm càng lớn thì giá trị càng nhỏ (−5 &lt; −1)</div>`},
+        {t:'Phương trình bậc nhất',d:'Giải phương trình ax + b = 0',c:`<h3>📌 Dạng tổng quát</h3><div class="formula">ax + b = 0 (a ≠ 0) → x = −b/a</div><div class="ex">Giải: 2x + 6 = 0\n→ 2x = −6 → x = −3</div><div class="hl">💡 Kiểm tra: thay x=−3 vào 2×(−3)+6 = 0 ✓</div>`},
+        {t:'Hình học: Tam giác',d:'Phân loại và tính diện tích',c:`<h3>📌 Phân loại</h3><div class="ex">Đều: 3 cạnh bằng nhau\nCân: 2 cạnh bằng nhau\nVuông: có 1 góc = 90°</div><div class="formula">S = (đáy × chiều cao) / 2</div><div class="ex">Đáy=8cm, h=5cm → S=8×5/2=20 cm²</div>`}
+      ],
+      quiz:[
+        {q:'Số nguyên âm nào lớn hơn: −3 hay −1?',o:['−3','−1','Bằng nhau','Không so được'],a:1},
+        {q:'Giải: 3x − 9 = 0, x = ?',o:['x=3','x=−3','x=9','x=−9'],a:0},
+        {q:'Diện tích tam giác đáy 10cm, cao 6cm là?',o:['16cm²','30cm²','60cm²','20cm²'],a:1},
+        {q:'−5 + 3 = ?',o:['8','−8','−2','2'],a:2},
+        {q:'Tam giác vuông có bao nhiêu góc = 90°?',o:['0','1','2','3'],a:1}
+      ],
+      fc:[
+        {f:'Số nguyên',p:'Integer',b:'Gồm số dương, 0 và số âm: ...−2,−1,0,1,2...',h:'Nhiệt độ, tầng hầm'},
+        {f:'Phương trình',p:'Equation',b:'Biểu thức chứa ẩn số với dấu =',h:'2x + 6 = 0'},
+        {f:'Tam giác đều',p:'Equilateral',b:'3 cạnh bằng nhau, 3 góc = 60°',h:'Mỗi góc đều bằng nhau'}
+      ]
+    },
+    '10':{
+      lessons:[
+        {t:'Hàm số bậc hai y = ax²',d:'Đồ thị Parabol và tính chất',c:`<h3>📌 Dạng tổng quát</h3><div class="formula">y = ax² + bx + c (a ≠ 0)</div><div class="ex">a &gt; 0: Parabol mở lên ∪, đỉnh là cực tiểu\na &lt; 0: Parabol mở xuống ∩, đỉnh là cực đại\nĐỉnh: x = −b/(2a)</div><div class="hl">💡 Trục đối xứng x = −b/(2a) chia Parabol làm 2 nửa bằng nhau</div>`},
+        {t:'Phương trình bậc hai',d:'Công thức nghiệm Delta',c:`<h3>📌 Công thức nghiệm</h3><div class="formula">x = (−b ± √Δ) / 2a &nbsp; với Δ = b² − 4ac</div><div class="ex">Δ &gt; 0: 2 nghiệm phân biệt\nΔ = 0: nghiệm kép x = −b/2a\nΔ &lt; 0: vô nghiệm trong ℝ</div><div class="hl">💡 Vi-et: x₁+x₂ = −b/a và x₁×x₂ = c/a</div>`},
+        {t:'Lượng giác cơ bản',d:'sin, cos, tan trong tam giác vuông',c:`<h3>📌 Định nghĩa</h3><div class="formula">sin α = đối/huyền &nbsp;|&nbsp; cos α = kề/huyền &nbsp;|&nbsp; tan α = đối/kề</div><div class="ex">30°: sin=0.5, cos≈0.866, tan≈0.577\n45°: sin=cos≈0.707, tan=1\n60°: sin≈0.866, cos=0.5, tan≈1.732</div>`}
+      ],
+      quiz:[
+        {q:'Parabol y=x² mở về phía nào?',o:['Mở xuống','Mở lên','Nằm ngang','Không xác định'],a:1},
+        {q:'Phương trình x²−5x+6=0 có nghiệm là?',o:['x=2 và x=3','x=1 và x=6','x=−2 và x=−3','Vô nghiệm'],a:0},
+        {q:'Khi Δ < 0 thì phương trình bậc 2 có bao nhiêu nghiệm thực?',o:['0','1','2','Vô số'],a:0},
+        {q:'sin 30° = ?',o:['√3/2','1/2','1','√2/2'],a:1},
+        {q:'Đỉnh của Parabol y = x²−4x+3 có x bằng?',o:['x=2','x=−2','x=4','x=−4'],a:0}
+      ],
+      fc:[
+        {f:'Parabol',p:'Parabola',b:'Đồ thị y=ax²+bx+c, dạng chữ U hoặc ∩',h:'a>0 → U, a<0 → ∩'},
+        {f:'Biệt thức Δ',p:'Discriminant',b:'Δ=b²−4ac, xác định số nghiệm pt bậc 2',h:'Δ>0: 2ng, Δ=0: kép, Δ<0: vô ng'},
+        {f:'sin α',p:'Sine',b:'Cạnh đối / cạnh huyền trong tam giác vuông',h:'sin 90°=1, sin 0°=0'}
+      ]
+    }
+  }},
+  english:{name:'🌍 Tiếng Anh',color:'#6bcb77',classes:{
+    '1':{
+      lessons:[
+        {t:'Bảng chữ cái A–Z',d:'Nhận biết và phát âm 26 chữ cái',c:`<h3>📌 Bảng chữ cái</h3><div class="ex">A B C D E F G H I J K L M\nN O P Q R S T U V W X Y Z</div><div class="ex">a b c d e f g h i j k l m\nn o p q r s t u v w x y z</div><div class="hl">💡 Hát bài ABC song để nhớ thứ tự nhanh hơn!</div>`},
+        {t:'Màu sắc cơ bản',d:'Red, Blue, Green, Yellow...',c:`<h3>📌 Màu sắc</h3><div class="ex">🔴 red (đỏ)    🔵 blue (xanh dương)\n🟢 green (xanh lá)  🟡 yellow (vàng)\n🟠 orange (cam)   🟣 purple (tím)\n⚫ black (đen)    ⚪ white (trắng)</div><div class="formula">What color is this? — It is RED.</div>`}
+      ],
+      quiz:[
+        {q:'How many letters in the English alphabet?',o:['24','25','26','27'],a:2},
+        {q:'What color is the sky?',o:['Red','Green','Blue','Yellow'],a:2},
+        {q:'Which letter comes after "D"?',o:['C','E','F','B'],a:1},
+        {q:'"Màu đỏ" in English is:',o:['Blue','Green','Red','Yellow'],a:2},
+        {q:'How do you spell the color of grass?',o:['GREN','GREAN','GREEN','GRIEN'],a:2}
+      ],
+      fc:[
+        {f:'Red',p:'/rɛd/',b:'Màu đỏ — màu của táo, mặt trời lặn',h:'The apple is red.'},
+        {f:'Blue',p:'/bluː/',b:'Màu xanh dương — màu của bầu trời',h:'The sky is blue.'},
+        {f:'Green',p:'/ɡriːn/',b:'Màu xanh lá — màu của cây cỏ',h:'Leaves are green.'}
+      ]
+    },
+    '6':{
+      lessons:[
+        {t:'Simple Present Tense',d:'Thì hiện tại đơn',c:`<h3>📌 Cấu trúc</h3><div class="formula">S + V(s/es) + O</div><div class="ex">She reads books every morning.\nHe goes to school by bike.</div><h3>🔍 Cách dùng</h3><div class="hl">💡 Thói quen, sự thật hiển nhiên, lịch trình cố định</div><p>Signal words: <b>always, usually, often, sometimes, never, every day</b></p><h3>❓ Phủ định & Nghi vấn</h3><div class="ex">She doesn't play tennis.\nDo you like pizza? — Yes, I do.</div>`},
+        {t:'Adjective Comparison',d:'So sánh hơn và so sánh nhất',c:`<h3>📌 So sánh hơn</h3><div class="formula">adj-er + than &nbsp;|&nbsp; more + adj + than</div><div class="ex">He is taller than me.\nThis is more expensive than that.</div><h3>📌 So sánh nhất</h3><div class="formula">the + adj-est &nbsp;|&nbsp; the most + adj</div><div class="ex">She is the smartest in class.</div><div class="hl">💡 Tính từ ngắn: -er/-est. Tính từ dài: more/most</div>`},
+        {t:'Simple Past Tense',d:'Thì quá khứ đơn',c:`<h3>📌 Cấu trúc</h3><div class="formula">S + V-ed / V(bất quy tắc) + O</div><div class="ex">I watched a movie yesterday.\nShe went to the market this morning.</div><h3>🔑 Động từ bất quy tắc</h3><div class="ex">go→went | have→had | come→came\nsee→saw | eat→ate | buy→bought</div><div class="hl">💡 Signal words: yesterday, last week, ago, in 2020</div>`}
+      ],
+      quiz:[
+        {q:'She _____ to school every day.',o:['go','goes','going','went'],a:1},
+        {q:'"She is ___ than her sister." Chọn đúng:',o:['more tall','taller','tallest','most tall'],a:1},
+        {q:'I _____ a movie last night. (watch)',o:['watch','watches','watching','watched'],a:3},
+        {q:'Past tense of "go" is:',o:['goed','goes','went','gone'],a:2},
+        {q:'The opposite of "hot" is:',o:['warm','cool','cold','freeze'],a:2}
+      ],
+      fc:[
+        {f:'Ambitious',p:'/æmˈbɪʃ.əs/',b:'(adj) Tham vọng, có chí hướng',h:'She is very ambitious.'},
+        {f:'Perseverance',p:'/ˌpɜː.sɪˈvɪər.əns/',b:'(n) Sự kiên trì, bền bỉ',h:'Perseverance leads to success.'},
+        {f:'Eloquent',p:'/ˈel.ə.kwənt/',b:'(adj) Hùng hồn, có tài ăn nói',h:'An eloquent speaker.'},
+        {f:'Diligent',p:'/ˈdɪl.ɪ.dʒənt/',b:'(adj) Chăm chỉ, cần cù',h:'A diligent student.'}
+      ]
+    },
+    '10':{
+      lessons:[
+        {t:'Conditionals (Câu điều kiện)',d:'Type 0, 1, 2, 3',c:`<h3>📌 Type 1 — Có thể xảy ra</h3><div class="formula">If + hiện tại, will + V</div><div class="ex">If it rains, I will stay home.</div><h3>📌 Type 2 — Không có thật hiện tại</h3><div class="formula">If + V-ed, would + V</div><div class="ex">If I were rich, I would travel the world.</div><h3>📌 Type 3 — Không có thật quá khứ</h3><div class="formula">If + had V-ed, would have V-ed</div><div class="ex">If she had studied, she would have passed.</div>`},
+        {t:'Passive Voice',d:'Câu bị động các thì',c:`<h3>📌 Cấu trúc</h3><div class="formula">S + be(chia thì) + V3 + (by O)</div><div class="ex">Active:  She writes a letter.\nPassive: A letter is written by her.</div><h3>📌 Các thì</h3><div class="ex">Present: is/am/are + V3\nPast: was/were + V3\nFuture: will be + V3</div><div class="hl">💡 Dùng khi chủ thể hành động không quan trọng hoặc không biết</div>`}
+      ],
+      quiz:[
+        {q:'If it rains tomorrow, I _____ stay home.',o:['would','will','had','might'],a:1},
+        {q:'Câu bị động của "She writes a letter" là:',o:['A letter writes by her.','A letter is written by her.','A letter was written by her.','A letter written by her.'],a:1},
+        {q:'Type 2 conditional dùng khi nào?',o:['Sự thật hiển nhiên','Điều có thể xảy ra','Điều không có thật hiện tại','Điều không có thật quá khứ'],a:2},
+        {q:'If I _____ rich, I would travel. (be)',o:['am','were','was','be'],a:1},
+        {q:'The letter _____ by Tom yesterday. (write)',o:['is written','was written','were written','written'],a:1}
+      ],
+      fc:[
+        {f:'Passive Voice',p:'Câu bị động',b:'S + be + V3 — chủ ngữ chịu tác động',h:'The book was read by her.'},
+        {f:'Type 2 Conditional',p:'Điều kiện loại 2',b:'Giả định không có thật hiện tại: If+V-ed, would+V',h:'If I were a bird...'},
+        {f:'Subjunctive',p:'/səbˈdʒʌŋktɪv/',b:'Thức giả định — dùng "were" cho mọi chủ ngữ',h:'If I were you...'}
+      ]
+    }
+  }},
+  literature:{name:'📖 Ngữ Văn',color:'#ff6b6b',classes:{
+    '3':{
+      lessons:[
+        {t:'Kể chuyện đơn giản',d:'Mở bài — thân bài — kết bài',c:`<h3>📌 3 phần của câu chuyện</h3><div class="ex">🟢 Mở bài: Giới thiệu nhân vật và hoàn cảnh\n🟡 Thân bài: Sự việc xảy ra, hành động của nhân vật\n🔴 Kết bài: Kết thúc câu chuyện và bài học</div><div class="hl">💡 Mỗi câu chuyện đều có nhân vật chính làm trung tâm!</div>`},
+        {t:'Từ đồng nghĩa và trái nghĩa',d:'Nhận biết và sử dụng trong văn',c:`<h3>📌 Từ đồng nghĩa</h3><p>Những từ có nghĩa giống hoặc gần nhau:</p><div class="ex">đẹp = xinh = dễ thương\nto = lớn = khổng lồ</div><h3>📌 Từ trái nghĩa</h3><div class="ex">đẹp ≠ xấu &nbsp;|&nbsp; to ≠ nhỏ\nnhanh ≠ chậm &nbsp;|&nbsp; vui ≠ buồn</div>`}
+      ],
+      quiz:[
+        {q:'Phần nào đứng đầu bài văn?',o:['Kết bài','Thân bài','Mở bài','Kết luận'],a:2},
+        {q:'Từ đồng nghĩa với "vui" là?',o:['Buồn','Hạnh phúc','Giận','Chán'],a:1},
+        {q:'Từ trái nghĩa với "to" là?',o:['Lớn','Khổng lồ','Nhỏ','Dài'],a:2},
+        {q:'Câu chuyện gồm mấy phần chính?',o:['2','3','4','5'],a:1},
+        {q:'"Nhanh" và "mau" là quan hệ gì?',o:['Trái nghĩa','Đồng nghĩa','Không liên quan','Khác từ loại'],a:1}
+      ],
+      fc:[
+        {f:'Mở bài',p:'Introduction',b:'Phần đầu bài văn — giới thiệu nhân vật và hoàn cảnh',h:'Ngày xửa ngày xưa...'},
+        {f:'Từ đồng nghĩa',p:'Synonym',b:'Từ có nghĩa giống hoặc gần giống nhau',h:'đẹp = xinh = dễ thương'},
+        {f:'Từ trái nghĩa',p:'Antonym',b:'Từ có nghĩa đối lập nhau',h:'to ≠ nhỏ, nhanh ≠ chậm'}
+      ]
+    },
+    '8':{
+      lessons:[
+        {t:'Biện pháp tu từ',d:'So sánh, nhân hóa, ẩn dụ, hoán dụ',c:`<h3>📌 So sánh</h3><div class="ex">❝ Công cha như núi Thái Sơn ❞</div><h3>📌 Nhân hóa</h3><div class="ex">❝ Ông mặt trời thức dậy sớm ❞</div><h3>📌 Ẩn dụ</h3><div class="ex">❝ Thuyền về có nhớ bến chăng? ❞\n(thuyền = người trai, bến = người gái)</div><h3>📌 Hoán dụ</h3><div class="ex">❝ Áo chàm đưa buổi phân li ❞\n(áo chàm = người Việt Bắc)</div>`},
+        {t:'Truyện Kiều — Nguyễn Du',d:'Cốt truyện và giá trị tác phẩm',c:`<h3>📌 Tác giả</h3><p><b>Nguyễn Du</b> (1765–1820) — đại thi hào dân tộc, danh nhân văn hóa thế giới.</p><h3>📌 Cốt truyện (3.254 câu lục bát)</h3><div class="hl">Thúy Kiều — người con gái tài sắc bị số phận xô đẩy lưu lạc 15 năm trước khi đoàn tụ với Kim Trọng.</div><h3>📌 Giá trị</h3><div class="ex">Nhân đạo: thương cảm số phận phụ nữ\nHiện thực: phê phán xã hội phong kiến</div>`},
+        {t:'Văn nghị luận',d:'Cấu trúc và cách viết',c:`<h3>📌 Mở bài</h3><div class="hl">Giới thiệu vấn đề cần nghị luận — hấp dẫn, ngắn gọn.</div><h3>📌 Thân bài</h3><div class="ex">Luận điểm 1: Giải thích vấn đề\nLuận điểm 2: Phân tích, chứng minh (dẫn chứng)\nLuận điểm 3: Phản biện / Mở rộng / Liên hệ</div><h3>📌 Kết bài</h3><p>Khẳng định lại, rút ra bài học hoặc lời kêu gọi hành động.</p><div class="ex">Mở bài hay = danh ngôn / câu hỏi gợi mở / sự kiện thực tế</div>`}
+      ],
+      quiz:[
+        {q:'"Công cha như núi Thái Sơn" — biện pháp tu từ gì?',o:['Ẩn dụ','Nhân hóa','So sánh','Hoán dụ'],a:2},
+        {q:'Truyện Kiều gồm bao nhiêu câu thơ lục bát?',o:['2.254','3.254','4.000','1.500'],a:1},
+        {q:'"Áo chàm đưa buổi phân li" — biện pháp tu từ gì?',o:['So sánh','Nhân hóa','Ẩn dụ','Hoán dụ'],a:3},
+        {q:'Nguyễn Du sinh năm nào?',o:['1760','1765','1770','1780'],a:1},
+        {q:'"Ông mặt trời" dùng biện pháp tu từ gì?',o:['So sánh','Nhân hóa','Hoán dụ','Ẩn dụ'],a:1}
+      ],
+      fc:[
+        {f:'So sánh',p:'Simile',b:'Đối chiếu 2 sự vật tương đồng, dùng "như","tựa","giống"',h:'Công cha như núi Thái Sơn'},
+        {f:'Nhân hóa',p:'Personification',b:'Gán đặc điểm của người cho vật, cây, hiện tượng',h:'Ông mặt trời, chị gió'},
+        {f:'Ẩn dụ',p:'Metaphor',b:'Gọi sự vật A bằng tên sự vật B có nét tương đồng',h:'Thuyền = người trai'},
+        {f:'Hoán dụ',p:'Metonymy',b:'Gọi sự vật bằng tên sự vật khác có quan hệ gần gũi',h:'Áo chàm = người Việt Bắc'}
+      ]
+    }
+  }},
+  chinese:{name:'🈶 Tiếng Trung',color:'#ff9f43',classes:{
+    'hsk1':{
+      lessons:[
+        {t:'Thanh điệu Tiếng Trung',d:'4 thanh điệu + thanh nhẹ',c:`<h3>📌 Hệ thống thanh điệu</h3><div class="hanzi-big">māo máo mǎo mào</div><table class="tone-table"><tr><th>Thanh</th><th>Ký hiệu</th><th>Mô tả</th><th>Ví dụ</th></tr><tr><td>1 (bằng)</td><td>ā</td><td>Cao đều, kéo dài</td><td>妈 māma (mẹ)</td></tr><tr><td>2 (sắc)</td><td>á</td><td>Lên cao dần</td><td>麻 má (tê liệt)</td></tr><tr><td>3 (hỏi)</td><td>ǎ</td><td>Xuống rồi lên</td><td>马 mǎ (ngựa)</td></tr><tr><td>4 (nặng)</td><td>à</td><td>Xuống mạnh</td><td>骂 mà (chửi)</td></tr><tr><td>nhẹ</td><td>a</td><td>Ngắn, nhẹ</td><td>吗 ma (à?)</td></tr></table><div class="hl">💡 Cùng âm khác thanh = nghĩa hoàn toàn khác nhau!</div>`},
+        {t:'Chào hỏi cơ bản',d:'你好, 谢谢, 对不起...',c:`<h3>📌 Câu chào hỏi thiết yếu</h3><div class="hanzi-big">你好 谢谢</div><div class="ex">你好 — Nǐ hǎo — Xin chào\n你好吗？— Nǐ hǎo ma? — Bạn khỏe không?\n我很好 — Wǒ hěn hǎo — Tôi rất khỏe\n谢谢 — Xièxiè — Cảm ơn\n不客气 — Bú kèqi — Không có gì\n对不起 — Duìbuqǐ — Xin lỗi\n没关系 — Méi guānxi — Không sao</div><div class="hl">💡 你(nǐ)=bạn | 我(wǒ)=tôi | 他/她(tā)=anh ấy/cô ấy</div>`},
+        {t:'Số đếm 1–100',d:'Hệ thống số Tiếng Trung',c:`<h3>📌 Số cơ bản</h3><div class="hanzi-big" style="font-size:1.6rem;letter-spacing:3px">一二三四五六七八九十</div><div class="ex">1=一(yī)  2=二(èr)  3=三(sān)  4=四(sì)  5=五(wǔ)\n6=六(liù) 7=七(qī)  8=八(bā)   9=九(jiǔ) 10=十(shí)\n11=十一(shí yī) | 20=二十(èr shí) | 100=一百(yī bǎi)</div><div class="formula">11–19: 十 + số đơn vị &nbsp;|&nbsp; 20–99: chục × 十 + đơn vị</div><div class="hl">💡 Số 8 (八 bā) rất may mắn trong văn hóa Trung Hoa!</div>`}
+      ],
+      quiz:[
+        {q:'"Xin chào" trong Tiếng Trung là?',o:['谢谢','再见','你好','对不起'],a:2},
+        {q:'Thanh điệu thứ 3 (ǎ) chuyển động như thế nào?',o:['Lên cao đều','Xuống rồi lên','Xuống mạnh','Giữ nguyên'],a:1},
+        {q:'"Cảm ơn" trong Tiếng Trung là?',o:['你好','谢谢','对不起','再见'],a:1},
+        {q:'Số 8 trong Tiếng Trung đọc là?',o:['qī','bā','jiǔ','liù'],a:1},
+        {q:'"Wǒ" (我) có nghĩa là?',o:['Bạn','Anh ấy','Tôi','Chúng tôi'],a:2}
+      ],
+      fc:[
+        {f:'你好',p:'Nǐ hǎo',b:'Xin chào — câu chào hỏi phổ biến nhất',h:'你=bạn, 好=tốt/khỏe'},
+        {f:'谢谢',p:'Xièxiè',b:'Cảm ơn',h:'Đáp lại: 不客气 (Bú kèqi)'},
+        {f:'对不起',p:'Duìbuqǐ',b:'Xin lỗi',h:'Đáp lại: 没关系 (Méi guānxi)'},
+        {f:'再见',p:'Zàijiàn',b:'Tạm biệt — hẹn gặp lại',h:'再=lại, 见=gặp'},
+        {f:'我爱你',p:'Wǒ ài nǐ',b:'Tôi yêu bạn',h:'我=tôi, 爱=yêu, 你=bạn'}
+      ]
+    },
+    'hsk2':{
+      lessons:[
+        {t:'Thời gian và ngày tháng',d:'Hỏi và nói về thời gian',c:`<h3>📌 Hỏi giờ</h3><div class="formula">现在几点？— Xiànzài jǐ diǎn? — Bây giờ mấy giờ?</div><div class="ex">两点 — Liǎng diǎn — 2 giờ\n三点半 — Sān diǎn bàn — 3 giờ rưỡi\n上午/下午 — shàngwǔ/xiàwǔ — sáng/chiều</div><h3>📌 Ngày tháng</h3><div class="ex">今天 — jīntiān — hôm nay\n明天 — míngtiān — ngày mai\n昨天 — zuótiān — hôm qua</div>`},
+        {t:'Mua sắm — Hỏi giá',d:'Từ vựng chợ, siêu thị',c:`<h3>📌 Hỏi giá</h3><div class="formula">多少钱？— Duōshao qián? — Bao nhiêu tiền?</div><div class="ex">这个多少钱？— Zhège duōshao qián? — Cái này bao nhiêu?\n太贵了！— Tài guì le! — Đắt quá!\n便宜一点 — Piányí yīdiǎn — Rẻ hơn một chút</div><div class="hanzi-big" style="font-size:1.5rem">钱 贵 便宜 买 卖</div>`}
+      ],
+      quiz:[
+        {q:'"Hôm nay" trong Tiếng Trung là?',o:['昨天','明天','今天','后天'],a:2},
+        {q:'"Bao nhiêu tiền?" trong Tiếng Trung là?',o:['怎么样？','多少钱？','几点？','你好？'],a:1},
+        {q:'"Míngtiān" (明天) có nghĩa là?',o:['Hôm qua','Hôm nay','Ngày mai','Tuần tới'],a:2},
+        {q:'太贵了 có nghĩa là?',o:['Rẻ quá','Đắt quá','Tốt quá','Nhiều quá'],a:1},
+        {q:'"Xiànzài jǐ diǎn?" dùng để hỏi điều gì?',o:['Tên','Giá','Giờ','Ngày'],a:2}
+      ],
+      fc:[
+        {f:'今天',p:'Jīntiān',b:'Hôm nay',h:'今=hiện tại, 天=ngày/trời'},
+        {f:'多少钱',p:'Duōshao qián',b:'Bao nhiêu tiền? (hỏi giá)',h:'多少=bao nhiêu, 钱=tiền'},
+        {f:'太...了',p:'Tài...le',b:'Quá... (biểu thị mức độ cao)',h:'太贵了 = đắt quá'},
+        {f:'我想买',p:'Wǒ xiǎng mǎi',b:'Tôi muốn mua',h:'想=muốn, 买=mua'}
+      ]
+    }
+  }}
+};
+
+const CG={
+  math:{label:'Toán Học',color:'#4d96ff',groups:[{title:'🏫 Tiểu học',cls:['1','2','3','4','5']},{title:'🏫 THCS',cls:['6','7','8','9']},{title:'🏫 THPT',cls:['10','11','12']}]},
+  english:{label:'Tiếng Anh',color:'#6bcb77',groups:[{title:'🏫 Tiểu học',cls:['1','2','3','4','5']},{title:'🏫 THCS',cls:['6','7','8','9']},{title:'🏫 THPT',cls:['10','11','12']}]},
+  literature:{label:'Ngữ Văn',color:'#ff6b6b',groups:[{title:'🏫 Tiểu học',cls:['3','4','5']},{title:'🏫 THCS',cls:['6','7','8','9']},{title:'🏫 THPT',cls:['10','11','12']}]},
+  chinese:{label:'Tiếng Trung',color:'#ff9f43',groups:[{title:'📗 Sơ cấp',cls:['hsk1']},{title:'📘 Trung cấp',cls:['hsk2']},{title:'📙 Cao cấp',cls:['hsk3','hsk4']}]}
+};
+const CD={hsk1:'HSK 1',hsk2:'HSK 2',hsk3:'HSK 3',hsk4:'HSK 4'};
+const cL=c=>CD[c]||'Lớp '+c;
+
+let curS=null,curC=null,xp=240,streak=3;
+let qState={},fcState={},dP=null;
+const LB=[
+  {n:'Minh Anh',av:'🦁',s:980},{n:'Hà Linh',av:'🦊',s:860},
+  {n:'Tuất Kiệt',av:'🐯',s:720},{n:'Bạn',av:'🚀',s:xp,me:true},
+  {n:'Phương Vy',av:'🐬',s:180},{n:'Đức Huy',av:'🦅',s:120}
+];
+
+// PWA
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();dP=e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click',async()=>{
+  if(!dP)return;dP.prompt();
+  const{outcome}=await dP.userChoice;
+  if(outcome==='accepted')toast('🎉 Đã cài EduPlay!');
+  dP=null;document.getElementById('installBanner').classList.remove('show');
+});
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function toast(m,d=3000){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d)}
+function getData(){const s=D[curS];return s.classes[curC]||null}
+function confetti(){const c=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff'];for(let i=0;i<40;i++){const e=document.createElement('div');e.className='cp';e.style.cssText=`left:${Math.random()*100}vw;background:${c[i%5]};animation-duration:${.7+Math.random()*.8}s;animation-delay:${Math.random()*.35}s;width:${6+Math.random()*7}px;height:${6+Math.random()*7}px`;document.body.appendChild(e);setTimeout(()=>e.remove(),1500)}}
+
+function goHome(){showPage('page-home')}
+
+function goClassSelect(subj){
+  curS=subj;curC=null;
+  document.getElementById('classSubjectTitle').textContent=D[subj].name;
+  const cfg=CG[subj],s=D[subj];
+  document.getElementById('classGrid').innerHTML=cfg.groups.map(g=>`
+    <div class="grade-group">
+      <h3>${g.title}<span class="grade-divider"></span></h3>
+      <div class="class-grid">${g.cls.map(c=>{
+        const has=!!s.classes[c];
+        return`<div class="class-btn${has?'':' disabled'}" style="--sel-color:${cfg.color};opacity:${has?1:.4}"
+          onclick="${has?`selectClass('${c}',this)`:`toast('Sắp có nội dung!')`}">
+          <div class="class-num">${cL(c)}</div>
+          <div class="class-label">${has?'✓ Có nội dung':'Sắp ra'}</div>
+        </div>`;
+      }).join('')}</div>
+    </div>`).join('');
+  document.getElementById('continueBtn').classList.remove('ready');
+  showPage('page-class');
+}
+
+function selectClass(c,el){
+  curC=c;
+  document.querySelectorAll('.class-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('continueBtn').classList.add('ready');
+}
+
+function goSubject(){
+  if(!curC)return;
+  document.getElementById('subjectTitle').textContent=D[curS].name;
+  document.getElementById('classTag').textContent=cL(curC);
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('[id^="tab-"]').forEach((t,i)=>t.style.display=i===0?'block':'none');
+  renderTheory();renderQuiz();renderFlashcard();renderLeaderboard();
+  showPage('page-subject');
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
+  document.getElementById('tab-'+name).style.display='block';
+}
+
+function renderTheory(){
+  const d=getData();
+  if(!d){document.getElementById('tab-theory').innerHTML='<div class="empty-state"><span class="em">📭</span>Chưa có bài học cho lớp này. Sắp ra mắt!</div>';return}
+  const nbg={math:'rgba(77,150,255,.14)',english:'rgba(107,203,119,.14)',literature:'rgba(255,107,107,.1)',chinese:'rgba(255,159,67,.14)'}[curS];
+  const nc=D[curS].color;
+  document.getElementById('tab-theory').innerHTML=`<div class="theory-list stagger">${d.lessons.map((l,i)=>`
+    <div class="theory-item" onclick="openLesson(${i})">
+      <div class="theory-num" style="background:${nbg};color:${nc}">${i+1}</div>
+      <div class="theory-info"><h4>${l.t}</h4><p>${l.d}</p></div>
+      <span class="theory-arrow">›</span>
+    </div>`).join('')}</div>`;
+}
+
+function openLesson(i){
+  const l=getData().lessons[i];
+  document.getElementById('lessonTitle').textContent=l.t;
+  document.getElementById('lessonContent').innerHTML=l.c;
+  document.getElementById('lessonOverlay').classList.add('show');
+}
+function closeLesson(){document.getElementById('lessonOverlay').classList.remove('show')}
+function closeLessonBg(e){if(e.target===document.getElementById('lessonOverlay'))closeLesson()}
+
+function renderQuiz(){
+  const d=getData();
+  if(!d){document.getElementById('tab-quiz').innerHTML='<div class="empty-state"><span class="em">🎯</span>Chưa có quiz cho lớp này. Sắp ra mắt!</div>';return}
+  const shuffled=shuffle(d.quiz).map(q=>{
+    const opts=shuffle(q.o.map((x,i)=>({x,i})));
+    return{q:q.q,o:opts.map(x=>x.x),a:opts.findIndex(x=>x.i===q.a)};
+  });
+  qState={qs:shuffled,idx:0,score:0,answered:false};
+  showQ();
+}
+
+function showQ(){
+  const{qs,idx}=qState;
+  if(idx>=qs.length){showQResult();return}
+  const q=qs[idx],pct=idx/qs.length*100;
+  document.getElementById('tab-quiz').innerHTML=`
+    <div class="quiz-wrapper">
+      <div class="quiz-topbar">
+        <span class="quiz-q-num">Câu ${idx+1}/${qs.length}</span>
+        <div class="quiz-pb"><div class="quiz-pb-fill" style="width:${pct}%"></div></div>
+        <span class="shuffle-badge">🔀 Ngẫu nhiên</span>
+      </div>
+      <div class="quiz-question">${q.q}</div>
+      <div class="quiz-options">${q.o.map((x,i)=>`
+        <button class="quiz-option" id="opt${i}" onclick="ansQ(${i})">
+          <span class="opt-letter">${'ABCD'[i]}</span>${x}
+        </button>`).join('')}
+      </div>
+      <div id="qFB"></div>
+      <button class="next-btn" id="nBtn" onclick="nextQ()">Câu tiếp theo →</button>
+    </div>`;
+}
+
+function ansQ(chosen){
+  if(qState.answered)return;
+  qState.answered=true;
+  const ok=chosen===qState.qs[qState.idx].a;
+  if(ok)qState.score++;
+  const correct=qState.qs[qState.idx].a;
+  document.querySelectorAll('.quiz-option').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct)b.classList.add('correct');
+    else if(i===chosen&&!ok)b.classList.add('wrong');
+  });
+  const fb=document.getElementById('qFB');
+  fb.className='quiz-fb '+(ok?'correct':'wrong');
+  fb.innerHTML=ok?'✅ Chính xác! Tuyệt vời!':'❌ Chưa đúng! Đáp án: <b>'+qState.qs[qState.idx].o[correct]+'</b>';
+  document.getElementById('nBtn').style.display='block';
+}
+
+function nextQ(){qState.idx++;qState.answered=false;showQ()}
+
+function showQResult(){
+  const{score,qs}=qState,pct=Math.round(score/qs.length*100);
+  const e=pct>=80?'🎉':pct>=60?'😊':'😅';
+  const m=pct>=80?'Xuất sắc! Bạn thật giỏi!':pct>=60?'Khá tốt! Cố thêm nhé!':'Ôn lại thêm chút nha!';
+  const earned=score*10;xp+=earned;
+  document.getElementById('xpCount').textContent=xp;
+  LB.find(l=>l.me).s=xp;
+  document.getElementById('tab-quiz').innerHTML=`
+    <div class="quiz-result">
+      <span class="result-emoji">${e}</span>
+      <div class="result-score" style="color:${pct>=80?'#6bcb77':pct>=60?'#ffd93d':'#ff6b6b'}">${score}/${qs.length}</div>
+      <div class="result-msg">${m}</div>
+      <div class="result-xp">⭐ +${earned} XP</div><br>
+      <button class="retry-btn" onclick="renderQuiz()">🔁 Làm lại (đề mới)</button>
+    </div>`;
+  if(pct>=80)confetti();
+}
+
+function renderFlashcard(){
+  const d=getData();
+  if(!d){document.getElementById('tab-flashcard').innerHTML='<div class="empty-state"><span class="em">🃏</span>Chưa có flashcard cho lớp này!</div>';return}
+  fcState={cards:shuffle(d.fc),idx:0,known:0};
+  showFC();
+}
+
+function showFC(){
+  const el=document.getElementById('tab-flashcard');
+  const{cards,idx,known}=fcState;
+  if(!cards.length){
+    el.innerHTML=`<div class="quiz-result">
+      <span class="result-emoji">🎊</span>
+      <div class="result-score" style="color:#6bcb77">Hoàn thành!</div>
+      <div class="result-msg">Đã ôn xong tất cả thẻ! Xuất sắc 🌟</div>
+      <div class="result-xp">⭐ +${known*5} XP</div><br>
+      <button class="retry-btn" onclick="renderFlashcard()">🔁 Ôn lại (thứ tự mới)</button>
+    </div>`;
+    xp+=known*5;document.getElementById('xpCount').textContent=xp;return;
+  }
+  const c=cards[idx%cards.length];
+  el.innerHTML=`
+    <div class="fc-area">
+      <div class="fc-tap">👆 Bấm vào thẻ để lật</div>
+      <div class="fc-scene" id="fcs" onclick="this.classList.toggle('flipped')">
+        <div class="fc-inner">
+          <div class="fc-front">
+            <div class="fc-label">Thuật ngữ</div>
+            <div class="fc-word">${c.f}</div>
+            <div class="fc-phonetic">${c.p}</div>
+          </div>
+          <div class="fc-back">
+            <div class="fc-label">Định nghĩa</div>
+            <div class="fc-meaning">${c.b}</div>
+            <div class="fc-hint">💡 ${c.h}</div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-controls">
+        <button class="fc-btn dontknow" onclick="fcAns(false)">✕ Chưa nhớ</button>
+        <button class="fc-btn know" onclick="fcAns(true)">✓ Đã nhớ</button>
+      </div>
+      <div class="fc-prog">Thẻ ${idx+1}/${cards.length} · Đã nhớ: <b>${known}</b></div>
+    </div>`;
+}
+
+function fcAns(k){
+  if(k){fcState.cards.splice(fcState.idx%fcState.cards.length,1);fcState.known++}
+  if(!fcState.cards.length){showFC();return}
+  fcState.idx++;showFC();
+}
+
+function renderLeaderboard(){
+  const sorted=[...LB].sort((a,b)=>b.s-a.s);
+  const rc=['g','s','b'];
+  document.getElementById('tab-leaderboard').innerHTML=`
+    <div class="lb-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span style="font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800">🏆 Bảng Xếp Hạng</span>
+        <span style="color:var(--muted);font-size:.78rem">Tuần này</span>
+      </div>
+      <div class="stagger">${sorted.map((p,i)=>`
+        <div class="lb-item ${p.me?'me':''}">
+          <div class="lb-rank ${rc[i]||''}">${i<3?['🥇','🥈','🥉'][i]:i+1}</div>
+          <div class="lb-avatar">${p.av}</div>
+          <div class="lb-name">${p.n}${p.me?' (Bạn)':''}</div>
+          <div class="lb-bar-w"><div class="lb-bar" style="width:${Math.min(100,p.s/sorted[0].s*100)}%"></div></div>
+          <div class="lb-score">${p.s} XP</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>
